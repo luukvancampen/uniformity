@@ -12,43 +12,55 @@ from api_communication import DefaultConversationalHandler
 
 # This method determines whether object belongs in a list. For example, it determines whether a column belongs in a group of other column,
 # which is relevant when determining low-level semantic uniformity.
-def object_belongs_in_list(handler, list, object, query, lock):
+def object_belongs_in_list(handler, list, object, query, lock, expert_question):
     list_item = random.choice(list)
     if query == "similar_type":
         comparison = list_item.to_json() + "\n" + object.to_json()
-        return api_communication.match(handler, comparison, prompts.type_similarity_system, lock)
+        return api_communication.match(handler, comparison, prompts.type_similarity_system_3, lock, expert_question)
     if query == "structural_syntactic_uniformity":
         comparison = list_item.to_json() + "\n" + object.to_json()
-        return api_communication.match(handler, comparison, prompts.syntax_similarity_system, lock)
+        return api_communication.match(handler, comparison, prompts.structural_syntactic_sim_2, lock, expert_question)
     if query == "structural_semantic_uniformity":
         comparison = list_item.to_json() + "\n" + object.to_json()
-        return api_communication.match(handler, comparison, prompts.structural_semantic_sim, lock)
+        return api_communication.match(handler, comparison, prompts.structural_semantic_sim_2, lock, expert_question)
     if query == "similar_table":
         table_message = list_item.to_json() + "\n" + object.to_json()
-        return api_communication.match(handler, table_message, prompts.table_system, lock)
+        return api_communication.match(handler, table_message, prompts.table_system, lock, expert_question)
     if query == "low_level_syntactic":
         comparison = list_item.to_json() + "\n" + object.to_json()
-        return api_communication.match(handler, comparison, prompts.columns_same_meaning, lock)
+        return api_communication.match(handler, comparison, prompts.columns_same_meaning, lock, expert_question)
 
 
 def object_belongs_in_list_map(similarity_map, object_list, _object):
     belongs = False
     for item in object_list:
         combination_hash = str(hash(item[0])) + str(hash(_object))
-        belongs = belongs or similarity_map[combination_hash]
+        try:
+            map_value = similarity_map[combination_hash]
+        except KeyError:
+            valid_input = False
+            while not valid_input:
+                user_input = input(f'Expert, are {_object.name} and {item[0].name} similar? Answer with y or n.')
+                if user_input == 'y':
+                    map_value = True
+                    valid_input = True
+                elif user_input == 'n':
+                    map_value = False
+                    valid_input = True
+        belongs = belongs or map_value
 
     return belongs
 
 
-def construct_sub_map(combinations, result, handler, lock, prompt, dict_lock):
+def construct_sub_map(combinations, result, handler, lock, prompt, dict_lock, expert_question):
     for combination in combinations:
         comparison = combination[0].data[0] + "\n" + combination[1].data[0]
-        api_result = api_communication.match(handler, comparison, prompt, lock)
+        api_result = api_communication.match(handler, comparison, prompt, lock, expert_question)
         with dict_lock:
             result[str(hash(combination[0])) + str(hash(combination[1]))] = api_result
 
 
-def parallel_construct_similarity_map(columns, prompt, n_threads=8):
+def parallel_construct_similarity_map(columns, prompt, expert_question, n_threads=8):
     similarity_map = dict()
     all_combinations = list(itertools.combinations(columns, 2))
     thread_list = []
@@ -57,7 +69,7 @@ def parallel_construct_similarity_map(columns, prompt, n_threads=8):
     parts = list(divide_list(all_combinations, n_threads))
     for i in range(n_threads):
         handler = DefaultConversationalHandler()
-        thread_list.append(threading.Thread(target=construct_sub_map, args=(parts[i], similarity_map, handler, input_lock, prompt, dictionary_lock,)))
+        thread_list.append(threading.Thread(target=construct_sub_map, args=(parts[i], similarity_map, handler, input_lock, prompt, dictionary_lock, expert_question, )))
     for t in thread_list:
         t.start()
     for t in thread_list:
@@ -76,9 +88,9 @@ def divide_list(lst, n):
 
 
 # This method takes a list of sublists, and it assigns object to the sublist in which it belongs.
-def assign_to_sublist(handler, group_list, object, query, lock):
+def assign_to_sublist(handler, group_list, object, query, lock, epxert_question):
     for sublist in group_list:
-        if object_belongs_in_list(handler, sublist, object, query, lock):
+        if object_belongs_in_list(handler, sublist, object, query, lock, epxert_question):
             sublist.append(object)
             return group_list
     group_list.append([object])
@@ -95,7 +107,7 @@ def assign_to_sublist_map(similarity_map, group_list, _object):
 
 
 # This function takes a list of columns or tables, and it groups them according to a particular query.
-def group(start_list, query, prompt, with_map=False):
+def group(start_list, query, prompt, expert_question, with_map=False):
     handler = DefaultConversationalHandler()
     group_list = []
     lock = threading.Lock()
@@ -103,7 +115,7 @@ def group(start_list, query, prompt, with_map=False):
         if os.path.isfile('./similarity_dict' + query) and query != "structural_syntactic_similarity" and query != "structural_semantic_similarity":
             similarity_map = pickle.load(open('similarity_dict' + query, 'rb'))
         else:
-            similarity_map = parallel_construct_similarity_map(start_list, prompt)
+            similarity_map = parallel_construct_similarity_map(start_list, prompt, expert_question)
             pickle.dump(similarity_map, open('similarity_dict' + query, 'wb'))
     for _object in start_list:
         if len(group_list) == 0:
@@ -112,7 +124,7 @@ def group(start_list, query, prompt, with_map=False):
         if with_map:
             group_list = assign_to_sublist_map(similarity_map, group_list, _object)
         else:
-            group_list = assign_to_sublist(handler, group_list, _object, query, lock)
+            group_list = assign_to_sublist(handler, group_list, _object, query, lock, expert_question)
     return group_list
 
 
@@ -132,13 +144,14 @@ def group_list_name_count(object_group_list):
 # containing values that also have a similar syntactic structure.
 def compute_structural_syntactic_uniformity(columns):
     # Step 1: group columns by whether they contain values of the same type.
-    group_list = group(columns, "similar_type", prompts.type_similarity_system_3, True)
+    group_list = group(columns, "similar_type", prompts.type_similarity_system_3, 'Domain expert, do the following values represent the same kind of data?\n ', True)
 
     # Step 2: further divide the columns by whether their syntactic structure is the same.
     subdivision = []
     for subgroup in group_list:
-        subdivision.append(group(subgroup, "structural_syntactic_similarity", prompts.structural_syntactic_sim_2, True))
+        subdivision.append(group(subgroup, "structural_syntactic_similarity", prompts.structural_syntactic_sim_2, 'Domain expert, do the following values have the same syntactic structure? ' , True))
     average_total = 0
+    print(subdivision)
     for sublist in subdivision:
         average_total += 1 / len(sublist)
     return average_total / len(subdivision)
@@ -146,14 +159,15 @@ def compute_structural_syntactic_uniformity(columns):
 
 def compute_structural_semantic_uniformity(columns):
     # Step 1: group columns by whether they contain values of the same datatype
-    group_list = group(columns, "similar_type", prompts.type_similarity_system_3, True)
+    group_list = group(columns, "similar_type", prompts.type_similarity_system_3, 'Domain expert, do the following values represent the same kind of data? ', True)
 
     # Step 2: further divide the columns by whether the values contained within them contain the exact same amount of information
     subdivision = []
     for subgroup in group_list:
-        subdivision.append(group(subgroup, "structural_semantic_similarity", prompts.structural_semantic_sim_2, True))
+        subdivision.append(group(subgroup, "structural_semantic_similarity", prompts.structural_semantic_sim_2, 'Domain expert, do the following values contain the exact same amount of information? ', True))
 
     average_total = 0
+    print(subdivision)
     for sublist in subdivision:
         average_total += 1 / len(sublist)
     return average_total / len(subdivision)
@@ -162,7 +176,7 @@ def compute_structural_semantic_uniformity(columns):
 # Computing high-level syntactic uniformity means determining whether tables that have the same meaning, also have the same name.
 # We do this by grouping tables by whether they have the same meaning and then determining whether all tables in a group have the same name.
 def compute_high_level_syntactic_uniformity(tables):
-    group_list = group(tables, "similar_table", prompt=None)
+    group_list = group(tables, "similar_table", prompts.table_system, 'Domain expert, are the following tables similar?' ,False)
     dissimilar_sum = 0
     for pair in group_list_name_count(group_list):
         dissimilar_sum += pair[1]
@@ -172,7 +186,7 @@ def compute_high_level_syntactic_uniformity(tables):
 # Low-level syntactic uniformity means that columns that have the same meaning, also have the same name. The first step in computing it is
 # grouping columns by whether they have the same meaning, the second step is determining whether they are named the same.
 def compute_low_level_syntactic_uniformity(columns):
-    group_list = group(columns, "low_level_syntactic", prompts.columns_same_meaning)
+    group_list = group(columns, "low_level_syntactic", prompts.columns_same_meaning, 'Domain expert, do the following columns have the same meaning? ')
     set_list = []
     for sub_list in group_list:
         subset = set()
@@ -180,7 +194,6 @@ def compute_low_level_syntactic_uniformity(columns):
             subset.add(_object.name)
         set_list.append((len(sub_list), len(subset)))
 
-    print(set_list)
     badness = 0
     for subset in set_list:
         badness += 1 / len(subset)
@@ -191,23 +204,21 @@ def compute_low_level_syntactic_uniformity(columns):
 # similar concepts also have similar columns.
 def compute_low_level_semantic_uniformity(tables):
     # Group similar tables....
-    grouping = group(tables, "similar_table", prompt=None)
+    grouping = group(tables, "similar_table", None, 'Domain expert, are the following two tables similar?')
     group_with_missing = []
     subgroup_uniformity = []
     for subgroup in grouping:
         total_missing = 0
         columns_in_permutation = 0
         if len(subgroup) > 1:
-            print(subgroup)
             permutations = list(itertools.permutations(subgroup, 2))
-            print(permutations)
             for permutation in permutations:
                 columns_in_permutation += len(permutation[0].columns) + len(permutation[1].columns)
                 total_missing += count_missing_columns(permutation[0], permutation[1])
         group_with_missing.append((columns_in_permutation, total_missing))
         if columns_in_permutation > 0:
             subgroup_uniformity.append(1 - (total_missing / columns_in_permutation))
-    return subgroup_uniformity
+    return subgroup_uniformity[0]
 
 
 def count_missing_columns(table1, table2):
@@ -215,7 +226,6 @@ def count_missing_columns(table1, table2):
     missing_column_counter = 0
     lock = threading.Lock()
     for _column in table1.columns:
-        print(_column.to_json() + " in " + table2.to_json())
         if not table_contains_similar_column(handler, _column, table2, lock):
             missing_column_counter += 1
     return missing_column_counter

@@ -1,20 +1,13 @@
-column_name_system = {
-    "role": "system",
-    "content": "You get two column names as input, separated by a new line."
-               "- if the names are likely to mean the same, return yes"
-               "- if the names are not likely to mean the same, return no"
-               "- if you are unsure whether the names mean the same, return unsure"
-}
-
 table_system = {
     "role": "system",
     "content": ("You get two database tables as input, formatted as JSON."
                 "You will determine whether the concepts represented by the tables are the same."
                 "To know at what level of abstraction the tables should be compared, you are provided with a list of concepts that indicates the required level of abstraction. If you think the concepts are the same, say \"yes\", else say \"no\"."
-                "Concepts: - wifi configuration"
+                "Concepts: "
+                "       - wifi configuration"
                 "       - email"
-                "       - gps coordinate"
-                "       - phone call")
+                "       - emails from specific mail clients"
+                "       - chat messages")
 }
 
 columns_same_meaning = {
@@ -25,17 +18,13 @@ columns_same_meaning = {
         "Columns mean the same if they contain the same kind of data and represent the same kind of thing."
         "- if you are not confident in the decision, return only unsure."
         "- if you think the columns are semantically similar, return only yes. "
-        "- if you think the columns are not semantically similar, return only no")
+        "- if you think the columns are not semantically similar, return only no"
+        "The following are examples of columns that are similar. You can use this to understand the level of abstraction at which to determine whether columns are similar."
+        "Message_sent_timestamp and sent_timestamp"
+        "Mail_content and message_content"
+        "Wifi network name and SSID")
 }
 
-type_similarity_system = {
-    "role": "system",
-    "content": (
-        "You get two values. If the values represent the same kind of information, say only yes, otherwise, say only no."
-        "Kinds of information that are similar are, for example:"
-        "- timestamps"
-        "- file paths ")
-}
 
 type_similarity_system_3 = {
     "role": "system",
@@ -53,27 +42,7 @@ type_similarity_system_3 = {
     )
 }
 
-type_similarity_system_2 = {
-    "role": "system",
-    "content": (
-        "determine whether the values in the 'data' field of the first object is of the same type as the that in the 'data' list of the second object. If so, say yes, if not, say no. If you are unsure, say unsure."
-        "Distinguish, for example, between timestamps, email addresses, zipcodes, and names."
-    )
-}
 
-syntax_similarity_system = {
-    "role": "system",
-    "content": (
-        "You get two lines with values as input, formatted as JSON. The JSON objects represent columns from a database. If the syntactic structure of the values in the two columns is similar, say yes, otherwise, say no."
-        "For example, distinguish between timestamps in different formats.")
-}
-
-structural_semantic_sim = {
-    "role": "system",
-    "content": (
-        "You get two lines with values as input, formatted as JSON. The JSON objects represent columns from a database. The columns contain the same type of data, for example, timestamps, file paths, or phone numbers. If the values in the columns contain exactly the same amount of information, say yes, otherwise, say no."
-        "For example, a timestamp format that includes a timezone contains more information than a timestampt that does not.")
-}
 
 structural_semantic_sim_2 = {
     "role": "system",
@@ -88,17 +57,13 @@ structural_semantic_sim_2 = {
 low_level_semantic_sim = {
     "role": "system",
     "content": 'You get two lines of input. The first line is a JSON representation of a database column. It contains the name of the column and a sample of the data. The second line is a JSON representation of a database table. '
-               'If the database table contains a column with similar semantics as the column provided to you as input, say yes. If not say no.'
+               'If the database table contains a column with similar semantics as the column provided to you as input, say yes. If not say no. If you can not make a decision, say unsure, but try to say yes or no.'
+               'Examples of columns that are similar:'
+               ' - Message_sent_timestamp and sent_timestamp'
+               ' - Mail_content and message_content'
+               ' - Wifi network name and SSID'
 }
 
-structural_syntactic_sim = {
-    'role': 'system',
-    'content': 'As input, you get two lines. On each line, there is a value.'
-               ' - if the values have the same syntactic structure, say only "yes".'
-               ' - if the values do not have the same syntactic structure, say only "no".'
-               'Examples of syntactic structures that are not similar are:'
-               ' - timestamps in different notation: 2023-08-11T14:30:00Z and 1691766600'
-}
 
 structural_syntactic_sim_2 = {
     'role' : 'system',
@@ -106,7 +71,11 @@ structural_syntactic_sim_2 = {
                 'You will receive two lines of input, each containing a value. Your task is to determine whether the two values share the same syntactic structure.'
                 ' - If the values have the same syntactic structure, respond only with "yes".'
                 ' - If the values do not have the same syntactic structure, respond only with "no".'
-                ' - If you can not decide, as a very last resort you can respond with "unsure". Try to always respond with "yes" or "no".'
+                ' - If you can not decide, as a fallback, you can respond with "unsure". Try to always respond with "yes" or "no".'
                 'Syntactic Structure Definition:'
-                'The syntactic structure refers to the format, pattern, or notation used to represent a value. '
+                'The syntactic structure refers to the format, pattern, or notation used to represent a value.'
+                'examples of non-similar syntax:'
+                ' - epoch vs human-readable timestamp'
+                ' - ipv-4 vs ipv-6'
+                ' - windows filepaths vs unix filepaths'
 }

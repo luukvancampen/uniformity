@@ -6,9 +6,8 @@ from tenacity import (
 )
 
 
-def prompt_domain_expert(question, options):
+def prompt_domain_expert(question):
     print(question)
-    print(options)
     input_valid = False
     while not input_valid:
         ruling = input("Please answer with either 'y' or 'n':\n")
@@ -41,7 +40,7 @@ class DefaultConversationalHandler:
         return reply
 
 
-def match(handler, comparison, prompt, lock):
+def match(handler, comparison, prompt, lock, expert_question=f'Domain expert, please determine whether the following are similar:\n'):
     try:
         response = handler.api_query(prompt, comparison)
         if response.lower() == "yes":
@@ -50,7 +49,7 @@ def match(handler, comparison, prompt, lock):
             return False
         elif response.lower() == "unsure":
             with lock:
-                return prompt_domain_expert(f"[[{response}]] Domain expert, please determine whether the following are similar: ", comparison)
+                return prompt_domain_expert(expert_question + comparison)
         else:
             return False
     except ValueError as e:
