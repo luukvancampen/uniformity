@@ -1,0 +1,6 @@
+SSID	BSSID	Last_Auto_Joined	Last_Updated	Network_Usage	Source	
+HomeNetwork_5G	00:14:22:01:23:45	1691894400	1700000000	4.56 GB	/private/var/preferences/com.apple.wifi.known-networks.plist	
+CoffeeShop_WiFi	00:1A:2B:3C:4D:5E	1691980800	1700086400	12.34 GB	/private/var/preferences/com.apple.wifi.known-networks.plist	
+OfficeNet_2024	11:22:33:44:55:66	1692067200	1700172800	7.89 GB	/private/var/preferences/com.apple.wifi.known-networks.plist	
+GuestNetwork_1	AA:BB:CC:DD:EE:FF	1692153600	1700259200	3.21 GB	/private/var/preferences/com.apple.wifi.known-networks.plist	
+CafeFreeWiFi	FF:EE:DD:CC:BB:AA	1692240000	1700345600	15.67 GB	/private/var/preferences/com.apple.wifi.known-networks.plist	

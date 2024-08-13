@@ -1,0 +1,6 @@
+Name,SSIDString,Preferred order,Type,Security Type,Auto login,Last Connected
+SkyNet_2.4,SkyNet_2.4,1,KNOWN,WPA2/WPA3 Personal,TRUE,2024-08-13 14:27:45.123456
+GalaxyNet_5G,GalaxyNet_5G,0,KNOWN,WPA2/WPA3 Personal,TRUE,2024-09-21 08:15:30.654321
+UrbanWiFi_2024,UrbanWiFi_2024,0,KNOWN,WPA2/WPA3 Personal,TRUE,2024-10-05 19:45:12.789012
+QuickConnect_1,QuickConnect_1,0,KNOWN,WPA2/WPA3 Personal,TRUE,2024-11-10 22:00:00.345678
+SunnyDay_WiFi,SunnyDay_WiFi,0,KNOWN,Open,TRUE,2024-12-25 11:59:59.987654
