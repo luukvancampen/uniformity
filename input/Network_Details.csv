@@ -1,0 +1,9 @@
+UUID,IPv4.ConfigMethod,IPv6.ConfigMethod,DeviceName,Hardware,Type,UserDefinedName,Proxies.ExceptionsList,Source
+887BCA27-F12E-4121-8E81-0F714AEEC145,DHCP,LinkLocal,ip1,com.apple.CommCenter,com.apple.CommCenter,com.apple.CommCenter (ip1),*.local,169.254/16,/private/var/Preferences/SystemConfiguration/preferences.plist
+F3388C2D-DA68-4BD8-9D2A-6FDC4AC84545,DHCP,Automatic,en2,Ethernet,Ethernet,Ethernet Adaptor (en2),*.local,169.254/16,/private/var/Preferences/SystemConfiguration/preferences.plist
+F409A39D-4C4B-4325-B1DC-DA165859FE62,DHCP,LinkLocal,ip2,com.apple.CommCenter,com.apple.CommCenter,com.apple.CommCenter (ip2),*.local,169.254/16,/private/var/Preferences/SystemConfiguration/preferences.plist
+EEFCA803-4DA6-4447-9FAE-FB396F314FDF,DHCP,Automatic,en0,AirPort,Ethernet,Wi-Fi,*.local,169.254/16,/private/var/Preferences/SystemConfiguration/preferences.plist
+1C440596-776B-4CD5-9B56-7FBC9A9D6D61,DHCP,Automatic,ip5,com.apple.CommCenter,com.apple.CommCenter,com.apple.CommCenter (ip5),*.local,169.254/16,/private/var/Preferences/SystemConfiguration/preferences.plist
+B542742B-B2C3-4616-B338-79A857817295,DHCP,LinkLocal,awdl0,Ethernet,Ethernet,Ethernet (awdl0),*.local,169.254/16,/private/var/Preferences/SystemConfiguration/preferences.plist
+D1C0BF0B-A2B2-41FD-831F-28AE005D31F7,DHCP,LinkLocal,ip4,com.apple.CommCenter,com.apple.CommCenter,com.apple.CommCenter (ip4),*.local,169.254/16,/private/var/Preferences/SystemConfiguration/preferences.plist
+9204FFE0-75A1-4B99-94AA-6C9988043E4F,DHCP,Automatic,ip3,com.apple.CommCenter,com.apple.CommCenter,com.apple.CommCenter (ip3),*.local,169.254/16,/private/var/Preferences/SystemConfiguration/preferences.plist
