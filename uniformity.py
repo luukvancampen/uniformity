@@ -151,7 +151,6 @@ def compute_structural_syntactic_uniformity(columns):
     for subgroup in group_list:
         subdivision.append(group(subgroup, "structural_syntactic_similarity", prompts.structural_syntactic_sim_2, 'Domain expert, do the following values have the same syntactic structure? ' , True))
     average_total = 0
-    print(subdivision)
     for sublist in subdivision:
         average_total += 1 / len(sublist)
     return average_total / len(subdivision)
@@ -167,7 +166,6 @@ def compute_structural_semantic_uniformity(columns):
         subdivision.append(group(subgroup, "structural_semantic_similarity", prompts.structural_semantic_sim_2, 'Domain expert, do the following values contain the exact same amount of information? ', True))
 
     average_total = 0
-    print(subdivision)
     for sublist in subdivision:
         average_total += 1 / len(sublist)
     return average_total / len(subdivision)
@@ -218,7 +216,7 @@ def compute_low_level_semantic_uniformity(tables):
         group_with_missing.append((columns_in_permutation, total_missing))
         if columns_in_permutation > 0:
             subgroup_uniformity.append(1 - (total_missing / columns_in_permutation))
-    return subgroup_uniformity[0]
+    return sum(subgroup_uniformity) / len(subgroup_uniformity)
 
 
 def count_missing_columns(table1, table2):

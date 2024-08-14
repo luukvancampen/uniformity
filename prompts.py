@@ -57,11 +57,11 @@ structural_semantic_sim_2 = {
 low_level_semantic_sim = {
     "role": "system",
     "content": 'You get two lines of input. The first line is a JSON representation of a database column. It contains the name of the column and a sample of the data. The second line is a JSON representation of a database table. '
-               'If the database table contains a column with similar semantics as the column provided to you as input, say yes. If not say no. If you can not make a decision, say unsure, but try to say yes or no.'
-               'Examples of columns that are similar:'
-               ' - Message_sent_timestamp and sent_timestamp'
-               ' - Mail_content and message_content'
-               ' - Wifi network name and SSID'
+               'If the database table contains a column with similar semantics as the column provided to you as input, say yes. If not say no. If you can not make a decision, say unsure..'
+               # 'Examples of columns that are similar:'
+               # ' - Message_sent_timestamp and sent_timestamp'
+               # ' - Mail_content and message_content'
+               # ' - Wifi network name and SSID'
 }
 
 
